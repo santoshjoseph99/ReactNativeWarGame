@@ -32,9 +32,49 @@ export default class Game {
   }
 
   play() {
+    if (this.player2.cards.length === 0) {
+      return {
+        result: GameResult.Player1WinsGame,
+        player1Cards: [],
+        player2Cards: [],
+      };
+    } else if (this.player1.cards.length === 0) {
+      return {
+        result: GameResult.Player2WinsGame,
+        player1Cards: [],
+        player2Cards: [],
+      };
+    }
     const player1HiddenCards = [];
     const player2HiddenCards = [];
     if (this.gameTied) {
+      if (this.player1.cards.length < 4) {
+        const player1Cards = this.player1.cards.slice(0);
+        this.player2.cards.push(
+          ...this.player1TiedCards,
+          ...this.player2TiedCards,
+          ...player1Cards
+        );
+        this.player1.cards = [];
+        return {
+          result: GameResult.Player2Wins,
+          player1Cards: player1Cards,
+          player2Cards: this.player2.cards.slice(0, 4),
+        };
+      } else if (this.player2.cards.length < 4) {
+        const player2Cards = this.player2.cards.slice(0);
+        this.player1.cards.push(
+          ...this.player1TiedCards,
+          ...this.player2TiedCards,
+          ...player2Cards
+        );
+        this.player2.cards = [];
+        return {
+          result: GameResult.Player1Wins,
+          player1Cards: this.player1.cards.slice(0, 4),
+          player2Cards: player2Cards,
+        };
+      }
       player1HiddenCards.push(this.player1.cards.shift());
       player1HiddenCards.push(this.player1.cards.shift());
       player1HiddenCards.push(this.player1.cards.shift());
@@ -43,8 +83,10 @@ export default class Game {
       player2HiddenCards.push(this.player2.cards.shift());
       this.gameTied = false;
     }
+
     const card1 = this.player1.cards.shift();
     const card2 = this.player2.cards.shift();
+
     if (this.compareCards(card1, card2) === 1) {
       this.player1.cards.push(card1);
       this.player1.cards.push(card2);
@@ -79,8 +121,8 @@ export default class Game {
       };
     } else {
       this.gameTied = true;
-      this.player1TiedCards.push(card1);
-      this.player2TiedCards.push(card2);
+      this.player1TiedCards.push(card1, ...player1HiddenCards);
+      this.player2TiedCards.push(card2, ...player2HiddenCards);
       return {
         result: GameResult.PlayerTie,
         player1Cards: player1HiddenCards.concat([card1]),
