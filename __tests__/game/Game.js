@@ -2,6 +2,54 @@ import {Card, Rank, Suit} from 'deckjs';
 import Game from '../../game/';
 import GameResult from '../../game/GameResult';
 
+function getRank(r) {
+  switch (r) {
+    case 'a':
+      return Rank.Ace;
+    case 'k':
+      return Rank.King;
+    case 'q':
+      return Rank.Queen;
+    case 'j':
+      return Rank.Jack;
+    case 't':
+      return Rank.Ten;
+    case '9':
+      return Rank.Nine;
+    case '8':
+      return Rank.Eight;
+    case '7':
+      return Rank.Seven;
+    case '6':
+      return Rank.Six;
+    case '5':
+      return Rank.Five;
+    case '4':
+      return Rank.Four;
+    case '3':
+      return Rank.Three;
+    case '2':
+      return Rank.Two;
+  }
+}
+
+function getSuit(s) {
+  switch (s) {
+    case 'c':
+      return Suit.Club;
+    case 's':
+      return Suit.Spade;
+    case 'd':
+      return Suit.Diamond;
+    case 'h':
+      return Suit.Heart;
+  }
+}
+
+function createCards(cardStr) {
+  return cardStr.split(' ').map((c) => new Card(getRank(c[0]), getSuit(c[1])));
+}
+
 it('Game', () => {
   const game = new Game();
 });
@@ -14,8 +62,9 @@ it('Game deals 26 cards to each player', () => {
 
 it('play game: player 1 wins hand', () => {
   const game = new Game();
-  game.player1.cards = [new Card(Rank.Ace, Suit.Club), new Card(Rank.King, Suit.Club)];
-  game.player2.cards = [new Card(Rank.King, Suit.Spade), new Card(Rank.Queen, Suit.Spade)];
+  game.player1.cards = createCards('ac kc');
+  game.player2.cards = createCards('ks qs');
+
   const handResult = game.play();
   expect(handResult.result).toBe(GameResult.Player1Wins);
   expect(handResult.player1Cards[0].toShortString()).toBe('ac');
@@ -26,8 +75,9 @@ it('play game: player 1 wins hand', () => {
 
 it('play game: player 2 wins hand', () => {
   const game = new Game();
-  game.player1.cards = [new Card(Rank.King, Suit.Club), new Card(Rank.King, Suit.Club)];
-  game.player2.cards = [new Card(Rank.Ace, Suit.Spade), new Card(Rank.Queen, Suit.Spade)];
+  game.player1.cards = createCards('kc jc');
+  game.player2.cards = createCards('as qs');
+
   const handResult = game.play();
   expect(handResult.result).toBe(GameResult.Player2Wins);
   expect(handResult.player1Cards[0].toShortString()).toBe('kc');
@@ -38,22 +88,9 @@ it('play game: player 2 wins hand', () => {
 
 it('play game: tie game, player 1 wins hand', () => {
   const game = new Game();
-  game.player1.cards = [
-    new Card(Rank.King, Suit.Club),
-    new Card(Rank.Three, Suit.Club),
-    new Card(Rank.Four, Suit.Club),
-    new Card(Rank.Five, Suit.Club),
-    new Card(Rank.Ace, Suit.Club),
-    new Card(Rank.Six, Suit.Club),
-  ];
-  game.player2.cards = [
-    new Card(Rank.King, Suit.Spade),
-    new Card(Rank.Three, Suit.Spade),
-    new Card(Rank.Five, Suit.Spade),
-    new Card(Rank.Four, Suit.Spade),
-    new Card(Rank.Queen, Suit.Spade),
-    new Card(Rank.Seven, Suit.Spade),
-  ];
+  game.player1.cards = createCards('kc 3c 4c 5c ac 6c');
+  game.player2.cards = createCards('ks 3s 5s 4s qs 7s');
+
   const handResult = game.play();
   expect(handResult.result).toBe(GameResult.PlayerTie);
   expect(handResult.player1Cards[0].toShortString()).toBe('kc');
@@ -72,22 +109,9 @@ it('play game: tie game, player 1 wins hand', () => {
 
 it('play game: tie game, player 2 wins hand', () => {
   const game = new Game();
-  game.player1.cards = [
-    new Card(Rank.King, Suit.Spade),
-    new Card(Rank.Three, Suit.Spade),
-    new Card(Rank.Five, Suit.Spade),
-    new Card(Rank.Four, Suit.Spade),
-    new Card(Rank.Queen, Suit.Spade),
-    new Card(Rank.Seven, Suit.Spade),
-  ];
-  game.player2.cards = [
-    new Card(Rank.King, Suit.Club),
-    new Card(Rank.Three, Suit.Club),
-    new Card(Rank.Four, Suit.Club),
-    new Card(Rank.Five, Suit.Club),
-    new Card(Rank.Ace, Suit.Club),
-    new Card(Rank.Six, Suit.Club),
-  ];
+  game.player1.cards = createCards('ks 3s 5s 4s qs 7s');
+  game.player2.cards = createCards('kc 3c 4c 5c ac 6c');
+
   const handResult = game.play();
   expect(handResult.result).toBe(GameResult.PlayerTie);
   expect(handResult.player1Cards[0].toShortString()).toBe('ks');
@@ -106,30 +130,9 @@ it('play game: tie game, player 2 wins hand', () => {
 
 it('play game: multiple ties, player 1 wins hand', () => {
   const game = new Game();
-  game.player1.cards = [
-    new Card(Rank.King, Suit.Spade), //initial tie
-    new Card(Rank.Three, Suit.Spade),
-    new Card(Rank.Five, Suit.Spade),
-    new Card(Rank.Four, Suit.Spade),
-    new Card(Rank.Queen, Suit.Spade), // 2nd tie
-    new Card(Rank.Seven, Suit.Spade),
-    new Card(Rank.Eight, Suit.Spade),
-    new Card(Rank.Nine, Suit.Spade),
-    new Card(Rank.Jack, Suit.Spade), //winner
-    new Card(Rank.Ten, Suit.Spade),
-  ];
-  game.player2.cards = [
-    new Card(Rank.King, Suit.Club), //initial tie
-    new Card(Rank.Three, Suit.Club),
-    new Card(Rank.Five, Suit.Club),
-    new Card(Rank.Four, Suit.Club),
-    new Card(Rank.Queen, Suit.Club), // 2nd tie
-    new Card(Rank.Seven, Suit.Club),
-    new Card(Rank.Eight, Suit.Club),
-    new Card(Rank.Nine, Suit.Club),
-    new Card(Rank.Two, Suit.Club), //loser
-    new Card(Rank.Ten, Suit.Club),
-  ];
+  game.player1.cards = createCards('ks 3s 5s 4s qs 7s 8s 9s js ts');
+  game.player2.cards = createCards('kc 3c 5c 4c qc 7c 8c 9c 2c tc');
+
   const handResult = game.play();
   expect(handResult.result).toBe(GameResult.PlayerTie);
   expect(handResult.player1Cards[0].toShortString()).toBe('ks');
@@ -156,6 +159,9 @@ it('play game: multiple ties, player 1 wins hand', () => {
 
 it('play game: multiple ties, player 2 wins hand', () => {
   const game = new Game();
+  game.player1.cards = createCards('ks 3s 5s 4s qs 7s 8s 9s 2s ts');
+  game.player2.cards = createCards('kc 3c 5c 4c qc 7c 8c 9c jc tc');
+
   game.player1.cards = [
     new Card(Rank.King, Suit.Spade), //initial tie
     new Card(Rank.Three, Suit.Spade),
@@ -206,18 +212,9 @@ it('play game: multiple ties, player 2 wins hand', () => {
 
 it('play game: tie, player 1 runs out of cards, player 2 wins', () => {
   const game = new Game();
-  game.player1.cards = [
-    new Card(Rank.King, Suit.Spade), //initial tie
-    new Card(Rank.Three, Suit.Spade),
-    new Card(Rank.Five, Suit.Spade),
-  ];
-  game.player2.cards = [
-    new Card(Rank.King, Suit.Club), //initial tie
-    new Card(Rank.Three, Suit.Club),
-    new Card(Rank.Five, Suit.Club),
-    new Card(Rank.Four, Suit.Club),
-    new Card(Rank.Queen, Suit.Club),
-  ];
+  game.player1.cards = createCards('ks 3s 5s');
+  game.player2.cards = createCards('kc 3c 5c 4c qc');
+
   const handResult = game.play();
   expect(handResult.result).toBe(GameResult.PlayerTie);
   expect(handResult.player1Cards[0].toShortString()).toBe('ks');
@@ -234,18 +231,9 @@ it('play game: tie, player 1 runs out of cards, player 2 wins', () => {
 
 it('play game: tie, player 2 runs out of cards, player 1 wins', () => {
   const game = new Game();
-  game.player1.cards = [
-    new Card(Rank.King, Suit.Club), //initial tie
-    new Card(Rank.Three, Suit.Club),
-    new Card(Rank.Five, Suit.Club),
-    new Card(Rank.Four, Suit.Club),
-    new Card(Rank.Queen, Suit.Club),
-  ];
-  game.player2.cards = [
-    new Card(Rank.King, Suit.Spade), //initial tie
-    new Card(Rank.Three, Suit.Spade),
-    new Card(Rank.Five, Suit.Spade),
-  ];
+  game.player1.cards = createCards('kc 3c 5c 4c qc');
+  game.player2.cards = createCards('ks 3s 5c');
+
   const handResult = game.play();
   expect(handResult.result).toBe(GameResult.PlayerTie);
   expect(handResult.player1Cards[0].toShortString()).toBe('kc');
@@ -262,14 +250,9 @@ it('play game: tie, player 2 runs out of cards, player 1 wins', () => {
 
 it('play game: player 1 wins game', () => {
   const game = new Game();
-  game.player1.cards = [
-    new Card(Rank.Ace, Suit.Club),
-    new Card(Rank.Three, Suit.Club),
-    new Card(Rank.Five, Suit.Club),
-    new Card(Rank.Four, Suit.Club),
-    new Card(Rank.Queen, Suit.Club),
-  ];
-  game.player2.cards = [new Card(Rank.King, Suit.Spade)];
+  game.player1.cards = createCards('ac 3c 5c 4c qc');
+  game.player2.cards = createCards('ks');
+
   const handResult = game.play();
   expect(handResult.result).toBe(GameResult.Player1Wins);
   expect(handResult.player1Cards[0].toShortString()).toBe('ac');
@@ -286,14 +269,9 @@ it('play game: player 1 wins game', () => {
 
 it('play game: player 2 wins game', () => {
   const game = new Game();
-  game.player1.cards = [new Card(Rank.King, Suit.Spade)];
-  game.player2.cards = [
-    new Card(Rank.Ace, Suit.Club),
-    new Card(Rank.Three, Suit.Club),
-    new Card(Rank.Five, Suit.Club),
-    new Card(Rank.Four, Suit.Club),
-    new Card(Rank.Queen, Suit.Club),
-  ];
+  game.player1.cards = createCards('ks');
+  game.player2.cards = createCards('ac 3c 5c 4c qc');
+
   const handResult = game.play();
   expect(handResult.result).toBe(GameResult.Player1Wins);
   expect(handResult.player1Cards[0].toShortString()).toBe('ks');
